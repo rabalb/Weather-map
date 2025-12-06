@@ -93,7 +93,7 @@
         <div id="map"></div>
 
         <!-- Loading Indicator -->
-        <div id="loadingIndicator" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-50">
+        <div id="loadingIndicator" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-[9999]">
             <div class="p-6 bg-white rounded-xl shadow-2xl flex items-center space-x-3">
                 <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -104,7 +104,7 @@
         </div>
 
         <!-- Notification Message Box -->
-        <div id="notificationBox" class="info-box fixed bottom-4 right-4 z-50 hidden transition-opacity duration-300 opacity-0 max-w-xs">
+        <div id="notificationBox" class="info-box fixed bottom-4 right-4 z-[9999] hidden transition-opacity duration-300 opacity-0 max-w-xs">
             <p id="notificationText" class="text-gray-700 text-sm"></p>
         </div>
 
@@ -169,7 +169,7 @@
             }
 
 
-            notificationBox.className = `info-box fixed bottom-4 right-4 z-50 transition-opacity duration-300 opacity-0 max-w-xs ${bgColor}`;
+            notificationBox.className = `info-box fixed bottom-4 right-4 z-[9999] transition-opacity duration-300 opacity-0 max-w-xs ${bgColor}`;
             notificationText.className = `${textColor} text-sm font-medium`;
             notificationText.innerHTML = message; // Use innerHTML to allow for bold/formatting
 
@@ -317,6 +317,7 @@
          * Calls the Gemini API to get a fun fact or travel tip based on weather data.
          */
         async function fetchGeminiInsight(location, temperature, description) {
+            console.log("Gemini Insight: Starting API call...");
             const systemPrompt = "You are a witty and helpful virtual travel guide. Your task is to provide a single, concise, and engaging travel insight, fun fact, or safety tip relevant to the current location and weather conditions. The response must be a single short paragraph, no more than 3 sentences.";
             const userQuery = `The current weather in ${location} is ${temperature} and the sky is ${description}. What is a relevant travel insight or fun fact?`;
             const apiKey = "";
@@ -340,6 +341,7 @@
                     });
 
                     if (!response.ok) {
+                        console.log(`Gemini Insight: Attempt ${i + 1} failed with status ${response.status}.`);
                         if (response.status === 429 && i < MAX_RETRIES - 1) {
                             // Too Many Requests (Rate Limit) -> Retry with exponential backoff
                             const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
@@ -350,14 +352,18 @@
                     }
 
                     const result = await response.json();
+                    console.log("Gemini Insight: Successful response received.", result);
                     const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
 
                     if (text) {
+                        console.log("Gemini Insight: Text extracted successfully.");
                         return `**✨ Gemini Insight:** ${text}`;
                     } else {
-                        throw new Error("Failed to parse LLM response.");
+                        console.error("Gemini Insight: Failed to extract text from candidate.", result);
+                        throw new Error("Failed to parse LLM response (no text content).");
                     }
                 } catch (error) {
+                    console.error(`Gemini Insight: Error during fetch or processing in attempt ${i + 1}:`, error);
                     if (i === MAX_RETRIES - 1) {
                         throw error;
                     }
@@ -509,6 +515,7 @@
                 // Listener for Gemini Insight Button
                 if (travelTipBtn) {
                     travelTipBtn.addEventListener('click', () => {
+                        console.log("Insight button clicked. Starting LLM process...");
                         const loc = travelTipBtn.getAttribute('data-location');
                         const weather = travelTipBtn.getAttribute('data-weather');
                         const temp = travelTipBtn.getAttribute('data-temp');
@@ -521,14 +528,16 @@
                         
                         fetchGeminiInsight(loc, temp, weather)
                             .then(insight => {
+                                console.log("Insight fetched successfully.");
                                 // Display LLM result in a specific notification box
                                 showNotification(insight, 'llm'); 
                             })
                             .catch(error => {
+                                console.error("LLM Insight Fetch failed:", error);
                                 showNotification('Failed to get insight. Try again later.', 'error');
-                                console.error("Gemini API Error:", error);
                             })
                             .finally(() => {
+                                console.log("LLM process finished. Re-enabling button.");
                                 // Re-enable button
                                 travelTipBtn.disabled = false;
                                 travelTipBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
