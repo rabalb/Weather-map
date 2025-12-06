@@ -25,74 +25,93 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
             border: 1px solid #e2e8f0;
         }
+        /* Custom gradient for the title */
+        .gradient-text {
+            background-image: linear-gradient(to right, #1d4ed8, #3b82f6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
     </style>
     <!-- Load Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         crossorigin=""/>
 
     <!-- --- GOOGLE ADS INTEGRATION START --- -->
-    <!-- 1. Initialize the global array for ad calls. Client ID: pub-3999150581617736 -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=pub-3999150581617736"
      crossorigin="anonymous"></script>
     <!-- --- GOOGLE ADS INTEGRATION END --- -->
 </head>
-<body class="bg-gray-100 min-h-screen p-4 sm:p-8 font-sans">
+<body class="bg-gray-50 min-h-screen p-4 sm:p-8 font-sans">
 
     <div class="max-w-7xl mx-auto">
-        <header class="text-center mb-8">
-            <h1 class="text-4xl sm:text-5xl font-extrabold text-blue-800 tracking-tight mb-2">
-                Global Temperature Tracker Map
+        <!-- Header with improved styling -->
+        <header class="text-center mb-10">
+            <h1 class="text-5xl sm:text-6xl font-black gradient-text tracking-tighter mb-2">
+                Real-time Global Weather Map
             </h1>
-            <!-- Updated description -->
-            <p class="text-gray-600 text-lg">Click anywhere or use the search bar to retrieve current weather conditions and a Gemini insight.</p>
+            <p class="text-gray-500 text-lg">Click anywhere or search for a location to view current weather conditions.</p>
         </header>
 
-        <!-- Search Bar -->
-        <div class="mb-6 p-4 bg-white rounded-xl shadow-lg border border-gray-200">
-            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <input type="text" id="cityInput" placeholder="Enter city name (e.g., Paris, Tokyo)"
-                       class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-sm transition"
-                       onkeydown="if(event.key === 'Enter') document.getElementById('searchCityBtn').click()">
-                <button id="searchCityBtn"
-                        class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    Search City
-                </button>
+        <!-- Main Layout: Map (9/12 columns) and Sidebar (3/12 columns) -->
+        <main class="grid lg:grid-cols-12 gap-8">
+
+            <!-- Primary Content Area (Map, Search, Status) -->
+            <div class="lg:col-span-9 space-y-6">
+
+                <!-- Search Bar Card -->
+                <div class="p-4 bg-white rounded-xl shadow-md border border-gray-100">
+                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                        <input type="text" id="cityInput" placeholder="Enter city name (e.g., London, Dubai)"
+                               class="flex-grow p-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 shadow-inner transition"
+                               onkeydown="if(event.key === 'Enter') document.getElementById('searchCityBtn').click()">
+                        <button id="searchCityBtn"
+                                class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            Search Location
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Status Message Card -->
+                <div class="p-4 bg-white rounded-xl shadow-md border border-gray-100 text-center">
+                    <div id="statusMessage" class="text-md font-medium text-blue-600 transition-colors">
+                        Map is ready. Click on any location or search for a city.
+                    </div>
+                </div>
+
+                <!-- Map Container -->
+                <div id="map"></div>
             </div>
-        </div>
-        
-        <!-- --- AD BANNER SLOT START --- -->
-        <!-- Ad Unit configured with both client and slot IDs -->
-        <div class="text-center mb-6">
-            <p class="text-sm text-gray-500 mb-2">Advertisement</p>
-            <ins class="adsbygoogle"
-                 style="display:block; text-align:center;"
-                 data-ad-client="pub-3999150581617736"
-                 data-ad-slot="8788572308"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>
-                // This pushes the ad to be rendered by the script loaded in the head.
-                try {
-                    (window.adsbygoogle = window.adsbygoogle || []).push({});
-                } catch (e) {
-                    console.error("AdSense integration error:", e);
-                }
-            </script>
-        </div>
-        <!-- --- AD BANNER SLOT END --- -->
 
-        <!-- Status Message -->
-        <div class="mb-6 p-4 bg-white rounded-xl shadow-lg border border-gray-200 text-center">
-            <div id="statusMessage" class="text-md font-semibold text-green-600 transition-colors">
-                Map is ready. Click on any location or search for a city to fetch keyless weather data.
-            </div>
-        </div>
+            <!-- Sidebar Content Area (Ad Unit) -->
+            <aside class="lg:col-span-3">
+                <div class="p-4 bg-white rounded-xl shadow-lg border border-gray-100 sticky top-4">
+                    <p class="text-sm text-gray-500 mb-4 font-semibold text-center uppercase border-b pb-2">Sponsored Content</p>
+                    
+                    <!-- --- AD BANNER SLOT START --- -->
+                    <div class="text-center">
+                        <ins class="adsbygoogle"
+                            style="display:block"
+                            data-ad-client="pub-3999150581617736"
+                            data-ad-slot="8788572308"
+                            data-ad-format="auto"
+                            data-full-width-responsive="true"></ins>
+                        <script>
+                            try {
+                                (window.adsbygoogle = window.adsbygoogle || []).push({});
+                            } catch (e) {
+                                console.error("AdSense integration error:", e);
+                            }
+                        </script>
+                    </div>
+                    <!-- --- AD BANNER SLOT END --- -->
+                </div>
+            </aside>
+        </main>
 
-        <!-- Map Container -->
-        <div id="map"></div>
-
-        <!-- Loading Indicator -->
+        <!-- Loading Indicator (Remains full-screen overlay with high z-index) -->
         <div id="loadingIndicator" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center z-[9999]">
             <div class="p-6 bg-white rounded-xl shadow-2xl flex items-center space-x-3">
                 <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -101,11 +120,6 @@
                 </svg>
                 <span class="text-lg font-medium text-gray-700">Fetching location and weather data...</span>
             </div>
-        </div>
-
-        <!-- Notification Message Box -->
-        <div id="notificationBox" class="info-box fixed bottom-4 right-4 z-[9999] hidden transition-opacity duration-300 opacity-0 max-w-xs">
-            <p id="notificationText" class="text-gray-700 text-sm"></p>
         </div>
 
     </div>
@@ -124,8 +138,7 @@
         let currentMarker = null;
         
         const loadingIndicator = document.getElementById('loadingIndicator');
-        const notificationBox = document.getElementById('notificationBox');
-        const notificationText = document.getElementById('notificationText');
+        const statusMessage = document.getElementById('statusMessage');
         const cityInput = document.getElementById('cityInput');
         const searchCityBtn = document.getElementById('searchCityBtn');
 
@@ -146,44 +159,22 @@
             return directions[index % 8];
         }
 
-        // --- Utility Functions ---
-
         /**
-         * Displays a temporary notification message.
+         * Updates the central status message element.
          * @param {string} message The message to display.
          * @param {string} type 'success', 'error', or 'info'
          */
-        function showNotification(message, type = 'info') {
-            let bgColor = 'bg-blue-100';
-            let textColor = 'text-blue-800';
+        function updateStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.classList.remove('text-red-600', 'text-green-600', 'text-blue-600');
 
             if (type === 'error') {
-                bgColor = 'bg-red-100';
-                textColor = 'text-red-800';
+                statusMessage.classList.add('text-red-600', 'font-bold');
             } else if (type === 'success') {
-                bgColor = 'bg-green-100';
-                textColor = 'text-green-800';
-            } else if (type === 'llm') {
-                bgColor = 'bg-purple-100';
-                textColor = 'text-purple-800';
+                statusMessage.classList.add('text-green-600');
+            } else {
+                statusMessage.classList.add('text-blue-600');
             }
-
-
-            notificationBox.className = `info-box fixed bottom-4 right-4 z-[9999] transition-opacity duration-300 opacity-0 max-w-xs ${bgColor}`;
-            notificationText.className = `${textColor} text-sm font-medium`;
-            notificationText.innerHTML = message; // Use innerHTML to allow for bold/formatting
-
-            // Show and fade out
-            notificationBox.classList.remove('hidden', 'opacity-0');
-            notificationBox.classList.add('opacity-100');
-
-            setTimeout(() => {
-                notificationBox.classList.remove('opacity-100');
-                notificationBox.classList.add('opacity-0');
-                setTimeout(() => {
-                    notificationBox.classList.add('hidden');
-                }, 300); // Wait for fade-out
-            }, 8000); // Increased visibility time for LLM response
         }
 
 
@@ -232,7 +223,7 @@
         async function geocodeAndSearch() {
             const city = cityInput.value.trim();
             if (!city) {
-                showNotification("Please enter a city name to search.", "info");
+                updateStatus("Please enter a location name to search.", "info");
                 return;
             }
 
@@ -262,13 +253,13 @@
                     await fetchDataForLocation(lat, lon, displayName);
                     
                 } else {
-                    showNotification(`Location "${city}" not found. Please try a different name.`, "error");
+                    updateStatus(`Location "${city}" not found. Please try a different name.`, "error");
                     loadingIndicator.classList.add('hidden');
                 }
 
             } catch (error) {
                 console.error("Geocoding failure:", error);
-                showNotification(`Could not process search request: ${error.message}`, "error");
+                updateStatus(`Could not process search request: ${error.message}`, "error");
                 loadingIndicator.classList.add('hidden');
             }
         }
@@ -313,67 +304,6 @@
             }
         }
         
-        /**
-         * Calls the Gemini API to get a fun fact or travel tip based on weather data.
-         */
-        async function fetchGeminiInsight(location, temperature, description) {
-            console.log("Gemini Insight: Starting API call...");
-            const systemPrompt = "You are a witty and helpful virtual travel guide. Your task is to provide a single, concise, and engaging travel insight, fun fact, or safety tip relevant to the current location and weather conditions. The response must be a single short paragraph, no more than 3 sentences.";
-            const userQuery = `The current weather in ${location} is ${temperature} and the sky is ${description}. What is a relevant travel insight or fun fact?`;
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: {
-                    parts: [{ text: systemPrompt }]
-                },
-                tools: [{ "google_search": {} }], // Use search grounding for up-to-date facts
-            };
-
-            const MAX_RETRIES = 5;
-            for (let i = 0; i < MAX_RETRIES; i++) {
-                try {
-                    const response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        console.log(`Gemini Insight: Attempt ${i + 1} failed with status ${response.status}.`);
-                        if (response.status === 429 && i < MAX_RETRIES - 1) {
-                            // Too Many Requests (Rate Limit) -> Retry with exponential backoff
-                            const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
-                            await new Promise(resolve => setTimeout(resolve, delay));
-                            continue;
-                        }
-                        throw new Error(`API error: ${response.statusText}`);
-                    }
-
-                    const result = await response.json();
-                    console.log("Gemini Insight: Successful response received.", result);
-                    const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
-
-                    if (text) {
-                        console.log("Gemini Insight: Text extracted successfully.");
-                        return `**✨ Gemini Insight:** ${text}`;
-                    } else {
-                        console.error("Gemini Insight: Failed to extract text from candidate.", result);
-                        throw new Error("Failed to parse LLM response (no text content).");
-                    }
-                } catch (error) {
-                    console.error(`Gemini Insight: Error during fetch or processing in attempt ${i + 1}:`, error);
-                    if (i === MAX_RETRIES - 1) {
-                        throw error;
-                    }
-                    // Continue loop for retry
-                }
-            }
-            throw new Error("Maximum retries reached for Gemini API call.");
-        }
-
-
         /**
          * Orchestrates the two fetch calls and handles failures gracefully.
          */
@@ -429,12 +359,12 @@
                     finalElevation = weatherData.elevation.toFixed(0) + ' m';
                 }
 
-                showNotification(`Weather for ${locationName} retrieved successfully.`, "success");
+                updateStatus(`Weather data loaded for ${locationName}. Click the marker for details.`, "success");
 
             } catch (error) {
                 // Handle critical weather API error
                 console.error("Critical Fetch error:", error);
-                showNotification(`Weather API failed: ${error.message}. Showing placeholder data.`, "error");
+                updateStatus(`Weather API failed: ${error.message}. Showing placeholder data.`, "error");
 
             } finally {
                 loadingIndicator.classList.add('hidden');
@@ -449,104 +379,57 @@
         }
         
         /**
-         * Updates the map marker popup with the processed data and attaches the button listeners.
+         * Updates the map marker popup with the processed data.
          */
         function updateMapAndDisplayData(temperature, description, snowDepth, elevation, windSpeed, windDirection, humidity, locationName, lat, lon) {
             
-            // 1. Construct Popup Content (Using w-full inside the popup)
+            // 1. Construct Popup Content (Now without the Gemini button)
             const popupContent = `
                 <div class="font-sans text-gray-800 w-full"> 
-                    <h3 class="text-xl font-bold text-blue-700 mb-1">${locationName}</h3>
+                    <h3 class="text-xl font-bold text-blue-700 mb-2">${locationName}</h3>
                     <div class="border-b border-gray-200 pb-2 mb-2">
-                        <p class="text-4xl font-extrabold">${temperature}</p>
-                        <p class="capitalize text-md text-gray-600 mb-2">${description}</p>
+                        <p class="text-4xl font-extrabold text-gray-900">${temperature}</p>
+                        <p class="capitalize text-md text-gray-600 mb-3">${description}</p>
                         
                         <!-- Core Weather Metrics -->
-                        <div class="space-y-1 mt-3">
+                        <div class="space-y-2 mt-3 text-sm">
+                            
                             <!-- Wind Information -->
-                            <div class="flex justify-between items-center text-sm font-medium text-gray-700 p-2 bg-blue-50 rounded-lg">
-                                <span>Wind:</span>
+                            <div class="flex justify-between items-center p-2 bg-blue-50 rounded-lg shadow-sm">
+                                <span class="text-gray-700 font-medium">Wind:</span>
                                 <span class="font-semibold text-blue-700">${windSpeed} (${windDirection})</span>
                             </div>
 
                             <!-- Humidity Information -->
-                            <div class="flex justify-between items-center text-sm font-medium text-gray-700 p-2 bg-blue-50 rounded-lg">
-                                <span>Humidity:</span>
+                            <div class="flex justify-between items-center p-2 bg-blue-50 rounded-lg shadow-sm">
+                                <span class="text-gray-700 font-medium">Humidity:</span>
                                 <span class="font-semibold text-blue-700">${humidity}</span>
                             </div>
                             
                             <!-- Snow Depth Information -->
-                            <div class="flex justify-between items-center text-sm font-medium text-gray-700 p-2 bg-gray-100 rounded-lg">
-                                <span>Snow Depth:</span>
+                            <div class="flex justify-between items-center p-2 bg-gray-100 rounded-lg shadow-sm">
+                                <span class="text-gray-700 font-medium">Snow Depth:</span>
                                 <span class="font-semibold text-gray-600">${snowDepth}</span>
                             </div>
                             
                             <!-- Elevation Information -->
-                            <div class="flex justify-between items-center text-sm font-medium text-gray-700 p-2 bg-gray-100 rounded-lg">
+                            <div class="flex justify-between items-center p-2 bg-gray-100 rounded-lg shadow-sm">
                                 <span>Elevation (AMSL):</span>
                                 <span class="font-semibold text-gray-600">${elevation}</span>
                             </div>
                         </div>
 
-                        <p class="mt-2 text-xs text-gray-500">Coordinates: (${lat}, ${lon})</p>
+                        <p class="mt-4 text-xs text-gray-500 italic">Data via Open-Meteo & Nominatim.</p>
+                        <p class="mt-1 text-xs text-gray-400">Coords: (${lat}, ${lon})</p>
                     </div>
-                    
-                    <!-- Gemini Insight Button (Existing) -->
-                    <button 
-                        id="travelTipBtn" 
-                        data-location="${locationName.replace(/"/g, '')}" 
-                        data-weather="${description.replace(/"/g, '')}" 
-                        data-temp="${temperature.replace(' °C', '')}" 
-                        class="w-full mt-3 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold rounded-lg transition shadow-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
-                    >
-                        ✨ Get Weather Insight
-                    </button>
-                    <p class="text-xs text-gray-400 italic mt-2">Data via Open-Meteo & Nominatim.</p>
                 </div>
             `;
 
-            // 2. Create a new marker and bind event listener for the buttons
+            // 2. Create a new marker
             currentMarker = L.marker([lat, lon]).addTo(map)
                 .bindPopup(popupContent, { maxWidth: 350 });
 
-            currentMarker.on('popupopen', function() {
-                const travelTipBtn = document.getElementById('travelTipBtn');
-
-                // Listener for Gemini Insight Button
-                if (travelTipBtn) {
-                    travelTipBtn.addEventListener('click', () => {
-                        console.log("Insight button clicked. Starting LLM process...");
-                        const loc = travelTipBtn.getAttribute('data-location');
-                        const weather = travelTipBtn.getAttribute('data-weather');
-                        const temp = travelTipBtn.getAttribute('data-temp');
-                        
-                        // Temporarily disable button and show loading
-                        travelTipBtn.disabled = true;
-                        travelTipBtn.classList.remove('bg-purple-600', 'hover:bg-purple-700');
-                        travelTipBtn.classList.add('bg-gray-400', 'cursor-not-allowed');
-                        travelTipBtn.textContent = 'Generating Insight...';
-                        
-                        fetchGeminiInsight(loc, temp, weather)
-                            .then(insight => {
-                                console.log("Insight fetched successfully.");
-                                // Display LLM result in a specific notification box
-                                showNotification(insight, 'llm'); 
-                            })
-                            .catch(error => {
-                                console.error("LLM Insight Fetch failed:", error);
-                                showNotification('Failed to get insight. Try again later.', 'error');
-                            })
-                            .finally(() => {
-                                console.log("LLM process finished. Re-enabling button.");
-                                // Re-enable button
-                                travelTipBtn.disabled = false;
-                                travelTipBtn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-                                travelTipBtn.classList.add('bg-purple-600', 'hover:bg-purple-700');
-                                travelTipBtn.textContent = '✨ Get Weather Insight';
-                            });
-                    });
-                }
-            }).openPopup();
+            currentMarker.openPopup();
         }
 
         // Initialize the map once the DOM content is fully loaded
